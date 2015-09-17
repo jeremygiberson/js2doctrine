@@ -1,0 +1,24 @@
+{
+    "name": "jgiberson/js2doctrine",
+    "description": "converts json-schemas to doctrine models",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jeremy Giberson",
+            "email": "jeremygiberson@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "require-dev": {
+        "behat/behat": "^3.0",
+        "mikey179/vfsstream": "^1.5@dev",
+        "phpunit/phpunit": "^4.5",
+        "zendframework/zend-code": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jgiberson\\JS2Doctrine\\": "src/"
+        }
+    }
+}
