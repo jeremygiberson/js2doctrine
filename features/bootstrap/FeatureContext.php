@@ -4,6 +4,9 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Jgiberson\JS2Doctrine\ModelGenerator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
@@ -19,18 +22,26 @@ class FeatureContext implements Context, SnippetAcceptingContext
     /** @var  ModelGenerator */
     private $generator;
 
+    /**
+     * FeatureContext constructor.
+     */
+    public function __construct()
+    {
+        AnnotationRegistry::registerFile(__DIR__ . '/../../vendor/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
+    }
+
+
     public function autoload($class)
     {
         $class_parts = explode('\\', $class);
 
-        $shortName = array_pop($class_parts);
+        array_unshift($class_parts, $this->vfs->url());
 
-        $filename = sprintf("%s.php", $shortName);
+        $filename = sprintf("%s.php", join('/', $class_parts));
 
-        if($this->vfs && $this->vfs->hasChild($filename))
+        if(file_exists($filename))
         {
-            $path = $this->vfs->getChild($filename)->url();
-            include $path;
+            include $filename;
         }
     }
 
@@ -39,6 +50,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theModelGeneratorForNamespace($namespace)
     {
+        if(isset($this->vfs)){
+            unset($this->vfs);
+        }
+
         $this->vfs = vfsStream::setup('root');
         spl_autoload_register([$this, 'autoload'], false);
 
@@ -91,6 +106,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $property = $reflection->getProperty($attribute);
         $annotations = $property->getDocComment();
         PHPUnit::assertContains($needle, $annotations);
+
+        $reader = new AnnotationReader();
+        $annotations = $reader->getPropertyAnnotations($property);
     }
 
 }

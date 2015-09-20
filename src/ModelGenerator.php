@@ -8,9 +8,9 @@
 namespace Jgiberson\JS2Doctrine;
 
 
-use Zend\Code\Generator\ClassGenerator;
-use Zend\Code\Generator\DocBlockGenerator;
-use Zend\Code\Generator\PropertyGenerator;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Tools\EntityGenerator;
+
 
 class ModelGenerator
 {
@@ -58,32 +58,27 @@ class ModelGenerator
             throw new \RuntimeException("title property must be defined");
         }
 
-        $classGenerator = new ClassGenerator();
-        $classGenerator->setName($className = $schema['title']);
-        $classGenerator->setNamespaceName($this->getNamespace());
+        $className = $schema['title'];
+
+        $medatadata = new ClassMetadata($this->getNamespace() . '\\' . $className);
 
         if(isset($schema['properties']))
         {
             foreach($schema['properties'] as $name => $definition)
             {
-                $classGenerator->addProperty($name, null, PropertyGenerator::FLAG_PROTECTED);
-
                 $type = $definition['type'];
-                $docBlock = DocBlockGenerator::fromArray([
-                    'tags' => [
-                        [
-                            'name' => sprintf("@Column(type=\"%s\")", $type),
-                            'description' => ''
-                        ],
-                    ],
-                ]);
 
-                $classGenerator->getProperty($name)->setDocBlock($docBlock);
+                $medatadata->mapField([
+                    'fieldName' => $name,
+                    'type' => $type
+                ]);
             }
         }
 
-        $classDef = $classGenerator->generate();
-        $filename = sprintf("%s/%s.php", $this->getPath(), $className);
-        file_put_contents($filename, sprintf("<?php\n\n%s", $classDef));
+        $filename = sprintf("%s/%s/%s.php", $this->getPath(), join('/', explode('\\', $this->getNamespace())) ,$className);
+        mkdir(dirname($filename), 0777, true);
+        $generator = new EntityGenerator();
+        $generator->setGenerateAnnotations(true);
+        file_put_contents($filename, $generator->generateEntityClass($medatadata));
     }
 }

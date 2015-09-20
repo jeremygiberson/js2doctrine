@@ -12,6 +12,5 @@
       "description": "Name of the product",
       "type": "string"
     }
-  },
-  "required": ["id", "name"]
+  }
 }

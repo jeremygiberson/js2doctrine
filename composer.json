@@ -9,7 +9,10 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "doctrine/annotations": "^1.2",
+        "doctrine/orm": "^2.5"
+    },
     "require-dev": {
         "behat/behat": "^3.0",
         "mikey179/vfsstream": "^1.5@dev",
