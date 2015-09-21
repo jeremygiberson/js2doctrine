@@ -7,6 +7,7 @@ use Behat\Gherkin\Node\TableNode;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\ORM\Mapping\Column;
 use Jgiberson\JS2Doctrine\ModelGenerator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
@@ -109,6 +110,55 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
         $reader = new AnnotationReader();
         $annotations = $reader->getPropertyAnnotations($property);
+    }
+
+    /**
+     * @Given /^the "([^"]*)" attribute "([^"]*)" is of type "([^"]*)"$/
+     */
+    public function theAttributeIsOfType($shortName, $attribute, $type)
+    {
+        $class = $this->generator->getNamespace() . "\\" . $shortName;
+        $reflection = new ReflectionClass($class);
+        PHPUnit::assertTrue($reflection->hasProperty($attribute));
+        $property = $reflection->getProperty($attribute);
+
+        $reader = new AnnotationReader();
+        /** @var Column $columnAnnotation */
+        $columnAnnotation = $reader->getPropertyAnnotation($property, Column::class);
+        PHPUnit::assertEquals($type, $columnAnnotation->type);
+    }
+
+    /**
+     * @Given /^the "([^"]*)" attribute "([^"]*)" is "([^"]*)"$/
+     */
+    public function theAttributeIs($shortName, $attribute, $annotationProperty)
+    {
+        $class = $this->generator->getNamespace() . "\\" . $shortName;
+        $reflection = new ReflectionClass($class);
+        PHPUnit::assertTrue($reflection->hasProperty($attribute));
+        $property = $reflection->getProperty($attribute);
+
+        $reader = new AnnotationReader();
+        /** @var Column $columnAnnotation */
+        $columnAnnotation = $reader->getPropertyAnnotation($property, Column::class);
+        PHPUnit::assertTrue($columnAnnotation->{$annotationProperty});
+
+    }
+
+    /**
+     * @Given /^the "([^"]*)" attribute "([^"]*)" is not "([^"]*)"$/
+     */
+    public function theAttributeIsNot($shortName, $attribute, $annotationProperty)
+    {
+        $class = $this->generator->getNamespace() . "\\" . $shortName;
+        $reflection = new ReflectionClass($class);
+        PHPUnit::assertTrue($reflection->hasProperty($attribute));
+        $property = $reflection->getProperty($attribute);
+
+        $reader = new AnnotationReader();
+        /** @var Column $columnAnnotation */
+        $columnAnnotation = $reader->getPropertyAnnotation($property, Column::class);
+        PHPUnit::assertNotTrue($columnAnnotation->{$annotationProperty});
     }
 
 }

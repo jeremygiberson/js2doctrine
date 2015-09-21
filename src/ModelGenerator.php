@@ -58,6 +58,8 @@ class ModelGenerator
             throw new \RuntimeException("title property must be defined");
         }
 
+        // TODO investigate implementation via ClassMetadataBuilder
+
         $className = $schema['title'];
 
         $medatadata = new ClassMetadata($this->getNamespace() . '\\' . $className);
@@ -68,9 +70,14 @@ class ModelGenerator
             {
                 $type = $definition['type'];
 
+                $nullable = isset($schema['required']) ? ! in_array($name, $schema['required']) : true;
+
                 $medatadata->mapField([
                     'fieldName' => $name,
-                    'type' => $type
+                    'type' => $type,
+                    'nullable' => $nullable,
+                    'options' => [
+                    ]
                 ]);
             }
         }
